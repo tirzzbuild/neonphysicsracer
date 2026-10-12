@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Physics Racer: Usaha & Daya</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Orbitron & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #05050a;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .neon-glow-cyan {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.6), inset 0 0 15px rgba(6, 182, 212, 0.3);
+        }
+        .neon-glow-pink {
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.7), inset 0 0 15px rgba(236, 72, 153, 0.3);
+        }
+        .cyber-border {
+            border: 2px solid rgba(6, 182, 212, 0.5);
+            background: rgba(13, 13, 26, 0.85);
+            backdrop-filter: blur(10px);
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .shake-screen {
+            animation: shake 0.4s;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090914;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #06b6d4;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body id="bodyContainer" class="min-h-screen flex flex-col justify-between select-none relative">
+
+    <div class="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-20">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-cyan-500 rounded-full filter blur-[120px]"></div>
+        <div class="absolute top-1/2 -right-40 w-96 h-96 bg-pink-500 rounded-full filter blur-[120px]"></div>
+        <div class="absolute -bottom-40 left-1/3 w-96 h-96 bg-purple-500 rounded-full filter blur-[120px]"></div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="relative z-10 flex-1 flex flex-col max-w-4xl w-full mx-auto p-4 md:p-6 justify-center">
+
+        <!-- 1. LOGIN SCREEN -->
+        <div id="loginScreen" class="flex flex-col items-center justify-center space-y-6 py-8">
+            <div class="text-center space-y-2">
+                <span class="px-4 py-1.5 rounded-full text-xs font-orbitron font-bold tracking-widest bg-cyan-950 text-cyan-300 border border-cyan-500/50 uppercase">
+                    Edukasi Fisika Interaktif
+                </span>
+                <h1 class="text-4xl md:text-6xl font-black font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-500">
+                    NEON RACER: USAHA & DAYA
+                </h1>
+                <p class="text-slate-400 text-sm md:text-base max-w-md mx-auto">
+                    Kuasai konsep Usaha ($W = F \times s$) dan Daya ($P = W/t$) dengan santai dan tepat!
+                </p>
+            </div>
+
+            <div class="cyber-border rounded-2xl p-6 md:p-8 w-full max-w-md space-y-5 shadow-2xl">
+                <div class="space-y-1">
+                    <label class="block text-xs font-orbitron text-cyan-300 tracking-wider">NAMA LENGKAP SISWA</label>
+                    <input type="text" id="inputName" placeholder="Contoh: Alex Chandra" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 transition-all font-medium">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-xs font-orbitron text-cyan-300 tracking-wider">KELAS</label>
+                    <input type="text" id="inputClass" placeholder="Contoh: 8A / 9B" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 transition-all font-medium">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-xs font-orbitron text-cyan-300 tracking-wider">PILIH TINGKAT KESULITAN SOAL</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button type="button" onclick="setDifficulty('easy')" id="btnEasy" class="diff-btn py-3 rounded-xl font-orbitron text-xs font-bold border border-cyan-500/40 bg-cyan-950/60 text-cyan-300 hover:bg-cyan-900/80 transition-all">
+                            MUDAH
+                        </button>
+                        <button type="button" onclick="setDifficulty('medium')" id="btnMedium" class="diff-btn py-3 rounded-xl font-orbitron text-xs font-bold border border-slate-700 bg-slate-900/60 text-slate-400 hover:bg-slate-800 transition-all">
+                            SEDANG
+                        </button>
+                        <button type="button" onclick="setDifficulty('hard')" id="btnHard" class="diff-btn py-3 rounded-xl font-orbitron text-xs font-bold border border-slate-700 bg-slate-900/60 text-slate-400 hover:bg-slate-800 transition-all">
+                            SULIT
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex gap-3">
+                    <button onclick="openGuide()" class="flex-1 py-3.5 px-4 rounded-xl font-orbitron text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition-all flex items-center justify-center gap-2">
+                        📖 PANDUAN
+                    </button>
+                    <button onclick="startGame()" class="flex-1 py-3.5 px-4 rounded-xl font-orbitron text-sm font-black bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 neon-glow-cyan transition-all transform active:scale-95">
+                        MULAI 🚀
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. GUIDE MODAL -->
+        <div id="guideModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+            <div class="cyber-border rounded-2xl p-6 md:p-8 max-w-2xl w-full max-h-[85vh] overflow-y-auto space-y-6">
+                <div class="flex justify-between items-center border-b border-cyan-500/30 pb-4">
+                    <h2 class="text-2xl font-black font-orbitron text-cyan-400">PANDUAN USAHA & DAYA</h2>
+                    <button onclick="closeGuide()" class="text-slate-400 hover:text-white font-bold text-xl px-3 py-1 rounded-lg bg-slate-800">×</button>
+                </div>
+                
+                <div class="space-y-4 text-sm text-slate-300">
+                    <div class="p-4 rounded-xl bg-cyan-950/40 border border-cyan-500/30 space-y-2">
+                        <h3 class="font-orbitron font-bold text-cyan-300 text-base">1. Usaha (Work - W)</h3>
+                        <p>Usaha adalah besarnya gaya yang diberikan pada suatu benda sehingga benda tersebut berpindah sejauh jarak tertentu.</p>
+                        <div class="p-2 bg-black/40 rounded font-mono text-cyan-400 font-bold text-center">
+                            W = F × s
+                        </div>
+                        <p class="text-xs text-slate-400">
+                            <strong>W</strong> = Usaha (Joule / J) | <strong>F</strong> = Gaya (Newton / N) | <strong>s</strong> = Perpindahan (Meter / m)
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-pink-950/40 border border-pink-500/30 space-y-2">
+                        <h3 class="font-orbitron font-bold text-pink-300 text-base">2. Daya (Power - P)</h3>
+                        <p>Daya adalah besar usaha yang dilakukan setiap satuan waktu.</p>
+                        <div class="p-2 bg-black/40 rounded font-mono text-pink-400 font-bold text-center">
+                            P = W / t  atau  P = (F × s) / t
+                        </div>
+                        <p class="text-xs text-slate-400">
+                            <strong>P</strong> = Daya (Watt / W) | <strong>W</strong> = Usaha (Joule / J) | <strong>t</strong> = Waktu (Sekon / s)
+                        </p>
+                    </div>
+                </div>
+
+                <button onclick="closeGuide()" class="w-full py-3 rounded-xl font-orbitron font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-all">
+                    MENGERTI, KEMBALI
+                </button>
+            </div>
+        </div>
+
+        <!-- CONFIRMATION MODAL -->
+        <div id="confirmModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden">
+            <div class="cyber-border rounded-2xl p-6 md:p-8 max-w-md w-full space-y-5 text-center shadow-2xl">
+                <div class="space-y-2">
+                    <span id="confirmBadge" class="px-3 py-1 rounded-full text-[10px] font-orbitron font-bold uppercase bg-yellow-950 text-yellow-300 border border-yellow-500/40">
+                        PERINGATAN
+                    </span>
+                    <h3 id="confirmTitle" class="text-xl font-black font-orbitron text-white">KONFIRMASI TINDAKAN</h3>
+                    <p id="confirmDesc" class="text-xs md:text-sm text-slate-300">Apakah kamu yakin ingin meninggalkan sesi kuis ini?</p>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button onclick="closeConfirmModal()" class="flex-1 py-3 rounded-xl font-orbitron text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition-all">
+                        LANJUTKAN KUIS
+                    </button>
+                    <button id="confirmActionBtn" onclick="executeConfirmedAction()" class="flex-1 py-3 rounded-xl font-orbitron text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow-lg transition-all">
+                        YA, KELUAR
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. GAME SCREEN -->
+        <div id="gameScreen" class="hidden flex flex-col items-center w-full space-y-3">
+            <!-- HUD / Top Bar -->
+            <div class="w-full flex flex-col md:flex-row justify-between items-center cyber-border rounded-xl px-4 py-3 gap-3 font-orbitron">
+                <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+                    <div class="flex items-center gap-2">
+                        <div class="flex flex-col">
+                            <span class="text-slate-400 text-[10px]">SISWA</span>
+                            <span id="hudName" class="font-bold text-cyan-300 truncate max-w-[90px]"></span>
+                        </div>
+                        <div class="h-6 w-[1px] bg-slate-700"></div>
+                        <div class="flex flex-col">
+                            <span class="text-slate-400 text-[10px]">KELAS</span>
+                            <span id="hudClass" class="font-bold text-pink-400"></span>
+                        </div>
+                    </div>
+
+                    <!-- Control Buttons in HUD -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="promptKembali()" class="px-2.5 py-1.5 rounded-lg text-[10px] bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 transition-all flex items-center gap-1" title="Kembali ke Menu Utama">
+                            🔙 KEMBALI
+                        </button>
+                        <button onclick="promptStop()" class="px-2.5 py-1.5 rounded-lg text-[10px] bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-500/40 transition-all flex items-center gap-1" title="Stop Mengerjakan & Lihat Hasil">
+                            🛑 STOP
+                        </button>
+                    </div>
+                </div>
+
+                <!-- HUD Indicators: Lives and Timer Only (No Score/Distance) -->
+                <div class="flex items-center gap-5">
+                    <div class="flex flex-col items-center">
+                        <span class="text-slate-400 text-[10px]">NYAWA</span>
+                        <div id="hudLives" class="flex gap-1 text-base">
+                            <span>❤️</span><span>❤️</span><span>❤️</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-slate-400 text-[10px]">WAKTU</span>
+                        <span id="hudTimer" class="font-bold text-pink-400 text-sm md:text-base">60s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Banner -->
+            <div id="questionBanner" class="w-full cyber-border rounded-xl p-3 text-center bg-gradient-to-r from-slate-900/90 via-cyan-950/80 to-slate-900/90 border-cyan-500/50 shadow-lg">
+                <span class="text-[10px] font-orbitron text-cyan-400 tracking-widest uppercase block mb-0.5">SOAL FISIKA: USAHA & DAYA</span>
+                <p id="questionText" class="text-xs md:text-base font-bold text-white">Memuat pertanyaan...</p>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="relative w-full max-w-2xl aspect-[3/4] md:aspect-[4/3] cyber-border rounded-2xl overflow-hidden shadow-2xl bg-slate-950">
+                <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+                
+                <div id="feedbackPopup" class="absolute inset-x-0 top-1/3 flex justify-center pointer-events-none opacity-0 transition-opacity duration-300">
+                    <span id="feedbackText" class="px-6 py-2 rounded-2xl font-orbitron font-black text-lg md:text-2xl shadow-2xl"></span>
+                </div>
+            </div>
+
+            <!-- On-Screen Controls for Touch Devices & Interactive Boards -->
+            <div class="w-full grid grid-cols-3 gap-2 md:gap-4 max-w-2xl">
+                <button ontouchstart="moveCarDirect(0)" onclick="moveCarDirect(0)" class="py-3.5 rounded-xl font-orbitron font-bold text-xs md:text-sm bg-slate-800/80 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1">
+                    ◀ KIRI
+                </button>
+                <button ontouchstart="moveCarDirect(1)" onclick="moveCarDirect(1)" class="py-3.5 rounded-xl font-orbitron font-bold text-xs md:text-sm bg-slate-800/80 hover:bg-slate-700 text-pink-400 border border-pink-500/40 shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1">
+                    ⏺️ TENGAH
+                </button>
+                <button ontouchstart="moveCarDirect(2)" onclick="moveCarDirect(2)" class="py-3.5 rounded-xl font-orbitron font-bold text-xs md:text-sm bg-slate-800/80 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1">
+                    KANAN ▶
+                </button>
+            </div>
+        </div>
+
+        <!-- 4. SUMMARY SCREEN (No Score or Distance) -->
+        <div id="summaryScreen" class="hidden cyber-border rounded-2xl p-6 md:p-8 max-w-2xl w-full mx-auto space-y-6 shadow-2xl">
+            <div class="text-center space-y-2">
+                <span class="px-4 py-1.5 rounded-full text-xs font-orbitron font-bold tracking-widest bg-pink-950 text-pink-300 border border-pink-500/50 uppercase">
+                    LAPORAN HASIL BELAJAR
+                </span>
+                <h2 class="text-3xl md:text-5xl font-black font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-500">
+                    EVALUASI USAHA & DAYA
+                </h2>
+                <p class="text-slate-400 text-sm">Hasil rekapitulasi tingkat pemahaman materi fisika.</p>
+            </div>
+
+            <!-- Summary Cards: Accuracy, Correct, Wrong, Remaining Lives -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 text-center space-y-1">
+                    <span class="text-[10px] font-orbitron text-slate-400">AKURASI</span>
+                    <p id="sumAccuracy" class="text-2xl font-black font-orbitron text-cyan-400">0%</p>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 text-center space-y-1">
+                    <span class="text-[10px] font-orbitron text-slate-400">BENAR</span>
+                    <p id="sumCorrect" class="text-2xl font-black font-orbitron text-emerald-400">0</p>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 text-center space-y-1">
+                    <span class="text-[10px] font-orbitron text-slate-400">SALAH</span>
+                    <p id="sumWrong" class="text-2xl font-black font-orbitron text-rose-400">0</p>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 text-center space-y-1">
+                    <span class="text-[10px] font-orbitron text-slate-400">SISA NYAWA</span>
+                    <p id="sumLives" class="text-2xl font-black font-orbitron text-amber-400">0</p>
+                </div>
+            </div>
+
+            <div class="p-5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 space-y-3">
+                <h3 class="font-orbitron font-bold text-cyan-300 text-sm">💡 REKOMENDASI EVALUASI</h3>
+                <p id="evaluationText" class="text-sm text-slate-300 leading-relaxed">Evaluasi performa kamu...</p>
+            </div>
+
+            <div class="flex gap-4 pt-2">
+                <button onclick="restartGame()" class="flex-1 py-3.5 rounded-xl font-orbitron font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition-all">
+                    MENU UTAMA 🔄
+                </button>
+                <button onclick="window.print()" class="flex-1 py-3.5 rounded-xl font-orbitron font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 text-slate-950 neon-glow-cyan transition-all">
+                    CETAK / SCREENSHOT 📸
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="relative z-10 py-4 text-center text-xs text-slate-500 font-orbitron">
+        NEON PHYSICS RACER &bull; USAHA DAN DAYA IPA KURIKULUM MERDEKA
+    </footer>
+
+    <script>
+        // --- WEB AUDIO API SYNTHESIZER ---
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.linearRampToValueAtTime(70, now + 0.35);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'gameover') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.linearRampToValueAtTime(50, now + 0.6);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.6);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                }
+            } catch (e) {
+                console.error("Audio error:", e);
+            }
+        }
+
+        // --- GAME CONFIG & STATE ---
+        let playerName = "";
+        let playerClass = "";
+        let difficulty = "easy";
+        let canvas, ctx;
+        
+        // SLOWED DOWN SPEED CONFIGURATION FOR CALM READING & CALCULATIONS
+        const speedConfig = {
+            easy: 1.5,
+            medium: 2.0,
+            hard: 2.5
+        };
+
+        let gameState = {
+            lives: 3,
+            timeLeft: 60,
+            correctCount: 0,
+            wrongCount: 0,
+            carLane: 1,
+            speed: 1.5,
+            isPaused: false
+        };
+
+        const questionBank = {
+            easy: [
+                { q: "Rumus Usaha (W) dalam Fisika adalah...", lanes: ["W = F x s", "W = P / t", "W = m x g"], correct: 0 },
+                { q: "Satuan Internasional (SI) untuk Usaha adalah...", lanes: ["Joule (J)", "Watt (W)", "Newton (N)"], correct: 0 },
+                { q: "Satuan Internasional (SI) untuk Daya adalah...", lanes: ["Watt (W)", "Joule (J)", "Joule/Meter"], correct: 0 },
+                { q: "Rumus Daya (P) adalah...", lanes: ["P = W / t", "P = F x s", "P = m x a"], correct: 0 }
+            ],
+            medium: [
+                { q: "Gaya 20 N memindahkan benda sejauh 5 m. Berapa Usaha (W)?", lanes: ["100 Joule", "4 Joule", "25 Joule"], correct: 0 },
+                { q: "Usaha 200 J dilakukan dalam waktu 4 sekon. Berapa Daya (P)?", lanes: ["50 Watt", "800 Watt", "48 Watt"], correct: 0 },
+                { q: "Sebuah balok ditarik dengan gaya 10 N sejauh 10 m. Hitung Usahanya!", lanes: ["100 Joule", "1 Joule", "20 Joule"], correct: 0 },
+                { q: "Daya sebesar 120 W dilakukan selama 2 s. Berapa Usaha (W)?", lanes: ["240 Joule", "60 Joule", "120 Joule"], correct: 0 }
+            ],
+            hard: [
+                { q: "Gaya 50 N bekerja membentuk perpindahan 8 m selama 4 sekon. Berapa Daya (P)?", lanes: ["100 Watt", "400 Watt", "25 Watt"], correct: 0 },
+                { q: "Usaha 1000 J dikerjakan dalam waktu 10 s. Berapa besar Daya (P)?", lanes: ["100 Watt", "10000 Watt", "10 Watt"], correct: 0 },
+                { q: "Gaya 25 N membuat benda berpindah 12 m dalam 3 sekon. Berapa Daya (P)?", lanes: ["100 Watt", "300 Watt", "75 Watt"], correct: 0 },
+                { q: "Sebuah peti ditarik gaya 40 N sejauh 15 m. Berapa Usaha yang dilakukan?", lanes: ["600 Joule", "55 Joule", "2.6 Joule"], correct: 0 }
+            ]
+        };
+
+        let gates = [];
+        let roadOffset = 0;
+        let pendingActionType = null;
+
+        function setDifficulty(diff) {
+            playSound('click');
+            difficulty = diff;
+            document.querySelectorAll('.diff-btn').forEach(btn => {
+                btn.className = "diff-btn py-3 rounded-xl font-orbitron text-xs font-bold border border-slate-700 bg-slate-900/60 text-slate-400 hover:bg-slate-800 transition-all";
+            });
+            document.getElementById('btn' + diff.charAt(0).toUpperCase() + diff.slice(1)).className = "diff-btn py-3 rounded-xl font-orbitron text-xs font-bold border border-cyan-500/40 bg-cyan-950/60 text-cyan-300 hover:bg-cyan-900/80 transition-all";
+        }
+
+        function openGuide() {
+            playSound('click');
+            document.getElementById('guideModal').classList.remove('hidden');
+        }
+
+        function closeGuide() {
+            playSound('click');
+            document.getElementById('guideModal').classList.add('hidden');
+        }
+
+        function promptKembali() {
+            playSound('click');
+            gameState.isPaused = true;
+            pendingActionType = 'kembali';
+            
+            document.getElementById('confirmBadge').innerText = "KEMBALI KE MENU";
+            document.getElementById('confirmTitle').innerText = "INGIN KEMBALI?";
+            document.getElementById('confirmDesc').innerText = "Progres balapan saat ini akan direset dan kamu akan kembali ke menu utama.";
+            document.getElementById('confirmActionBtn').innerText = "YA, KEMBALI";
+            document.getElementById('confirmActionBtn').className = "flex-1 py-3 rounded-xl font-orbitron text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg transition-all";
+            
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function promptStop() {
+            playSound('click');
+            gameState.isPaused = true;
+            pendingActionType = 'stop';
+
+            document.getElementById('confirmBadge').innerText = "STOP MENGERJAKAN";
+            document.getElementById('confirmTitle').innerText = "AKHIRI SESI KUIS?";
+            document.getElementById('confirmDesc').innerText = "Sesi kuis akan dihentikan dan statistik hasil kamu akan langsung direkap ke halaman evaluasi.";
+            document.getElementById('confirmActionBtn').innerText = "YA, LIHAT HASIL";
+            document.getElementById('confirmActionBtn').className = "flex-1 py-3 rounded-xl font-orbitron text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow-lg transition-all";
+
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            playSound('click');
+            gameState.isPaused = false;
+            document.getElementById('confirmModal').classList.add('hidden');
+        }
+
+        function executeConfirmedAction() {
+            playSound('click');
+            document.getElementById('confirmModal').classList.add('hidden');
+            stopGameIntervals();
+
+            if (pendingActionType === 'kembali') {
+                document.getElementById('gameScreen').classList.add('hidden');
+                document.getElementById('loginScreen').classList.remove('hidden');
+            } else if (pendingActionType === 'stop') {
+                endGame();
+            }
+        }
+
+        function stopGameIntervals() {
+            if (window.gameLoopInterval) clearInterval(window.gameLoopInterval);
+            if (window.timerInterval) clearInterval(window.timerInterval);
+            window.removeEventListener('keydown', handleKeydown);
+        }
+
+        function startGame() {
+            playSound('click');
+            playerName = document.getElementById('inputName').value.trim();
+            playerClass = document.getElementById('inputClass').value.trim();
+
+            if (!playerName || !playerClass) {
+                showCustomMessage("Harap isi Nama Siswa dan Kelas terlebih dahulu!");
+                return;
+            }
+
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+
+            document.getElementById('hudName').innerText = playerName;
+            document.getElementById('hudClass').innerText = playerClass;
+
+            gameState = {
+                lives: 3,
+                timeLeft: difficulty === 'easy' ? 90 : (difficulty === 'medium' ? 75 : 60),
+                correctCount: 0,
+                wrongCount: 0,
+                carLane: 1,
+                speed: speedConfig[difficulty], // Slow, manageable speed
+                isPaused: false
+            };
+
+            updateLivesUI();
+
+            gates = [];
+            spawnGate();
+
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            window.addEventListener('keydown', handleKeydown);
+
+            // Direct Click / Touch event on Canvas to instantly switch lane by tapping gates or lanes
+            canvas.onclick = handleCanvasClick;
+
+            stopGameIntervals();
+
+            window.gameLoopInterval = setInterval(updateGame, 1000 / 60);
+            window.timerInterval = setInterval(() => {
+                if (!gameState.isPaused) {
+                    gameState.timeLeft--;
+                    document.getElementById('hudTimer').innerText = gameState.timeLeft + 's';
+                    if (gameState.timeLeft <= 0) {
+                        endGame();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateLivesUI() {
+            let heartsHtml = "";
+            for (let i = 0; i < 3; i++) {
+                if (i < gameState.lives) {
+                    heartsHtml += "❤️";
+                } else {
+                    heartsHtml += "🖤";
+                }
+            }
+            document.getElementById('hudLives').innerHTML = heartsHtml;
+        }
+
+        function showCustomMessage(msg) {
+            const banner = document.getElementById('questionText');
+            const originalText = banner.innerText;
+            banner.innerText = "⚠️ " + msg;
+            banner.style.color = "#f43f5e";
+            setTimeout(() => {
+                banner.innerText = originalText;
+                banner.style.color = "#ffffff";
+            }, 2500);
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+
+        function handleKeydown(e) {
+            if (gameState.isPaused) return;
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                moveCar('left');
+            } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                moveCar('right');
+            } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 's' || e.key === 'S' || e.key === 'w' || e.key === 'W' || e.key === ' ') {
+                moveCarDirect(1); // Jump straight to Middle Lane
+            }
+        }
+
+        function moveCar(direction) {
+            if (gameState.isPaused) return;
+            playSound('click');
+            if (direction === 'left' && gameState.carLane > 0) {
+                gameState.carLane--;
+            } else if (direction === 'right' && gameState.carLane < 2) {
+                gameState.carLane++;
+            }
+        }
+
+        // Direct Lane Switch method (0 = Left, 1 = Middle, 2 = Right)
+        function moveCarDirect(laneIndex) {
+            if (gameState.isPaused) return;
+            playSound('click');
+            gameState.carLane = laneIndex;
+        }
+
+        // Tap/Click directly on Canvas Lane or Answer Gate
+        function handleCanvasClick(e) {
+            if (gameState.isPaused || !canvas) return;
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const laneWidth = canvas.width / 3;
+
+            if (clickX < laneWidth) {
+                moveCarDirect(0); // Left
+            } else if (clickX < laneWidth * 2) {
+                moveCarDirect(1); // Middle
+            } else {
+                moveCarDirect(2); // Right
+            }
+        }
+
+        function spawnGate() {
+            const qList = questionBank[difficulty];
+            const randomQ = qList[Math.floor(Math.random() * qList.length)];
+
+            document.getElementById('questionText').innerText = randomQ.q;
+
+            let correctLane = Math.floor(Math.random() * 3);
+            let gateItems = [];
+            let otherAnswers = randomQ.lanes.filter((_, idx) => idx !== randomQ.correct);
+            let wrongIdx = 0;
+
+            for (let i = 0; i < 3; i++) {
+                if (i === correctLane) {
+                    gateItems.push({ text: randomQ.lanes[randomQ.correct], isCorrect: true, lane: i });
+                } else {
+                    gateItems.push({ text: otherAnswers[wrongIdx++] || "Salah", isCorrect: false, lane: i });
+                }
+            }
+
+            gates.push({
+                y: -120,
+                items: gateItems,
+                passed: false
+            });
+        }
+
+        function updateGame() {
+            if (gameState.isPaused) return;
+
+            roadOffset = (roadOffset + gameState.speed) % 40;
+
+            for (let i = gates.length - 1; i >= 0; i--) {
+                gates[i].y += gameState.speed;
+
+                let carYPos = canvas.height * 0.75;
+                if (!gates[i].passed && gates[i].y >= carYPos - 40 && gates[i].y <= carYPos + 40) {
+                    gates[i].passed = true;
+                    let chosenItem = gates[i].items.find(item => item.lane === gameState.carLane);
+                    if (chosenItem) {
+                        if (chosenItem.isCorrect) {
+                            playSound('correct');
+                            gameState.correctCount++;
+                            showFeedback("BENAR!", "#10b981");
+                        } else {
+                            // WRONG ANSWER: DEDUCT LIFE & TRIGGER SCREEN SHAKE
+                            gameState.wrongCount++;
+                            gameState.lives--;
+                            updateLivesUI();
+                            
+                            triggerScreenShake();
+
+                            if (gameState.lives <= 0) {
+                                playSound('gameover');
+                                showFeedback("NYAWA HABIS!", "#f43f5e");
+                                setTimeout(() => {
+                                    endGame();
+                                }, 600);
+                                return;
+                            } else {
+                                playSound('wrong');
+                                showFeedback("JAWABAN SALAH (-1 ❤️)", "#f43f5e");
+                            }
+                        }
+                    }
+                }
+
+                if (gates[i].y > canvas.height + 100) {
+                    gates.splice(i, 1);
+                    spawnGate();
+                }
+            }
+
+            renderCanvas();
+        }
+
+        function triggerScreenShake() {
+            const body = document.getElementById('bodyContainer');
+            body.classList.add('shake-screen');
+            setTimeout(() => {
+                body.classList.remove('shake-screen');
+            }, 400);
+        }
+
+        function showFeedback(text, color) {
+            const fb = document.getElementById('feedbackPopup');
+            const txt = document.getElementById('feedbackText');
+            txt.innerText = text;
+            txt.style.color = color;
+            txt.style.background = "rgba(5, 5, 10, 0.9)";
+            txt.style.border = `2px solid ${color}`;
+            fb.style.opacity = "1";
+            setTimeout(() => {
+                fb.style.opacity = "0";
+            }, 900);
+        }
+
+        function renderCanvas() {
+            if (!ctx || !canvas) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#090914';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let laneWidth = canvas.width / 3;
+
+            // Lane Dividers
+            ctx.strokeStyle = '#06b6d4';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([20, 20]);
+            ctx.lineDashOffset = -roadOffset;
+            ctx.beginPath();
+            ctx.moveTo(laneWidth, 0);
+            ctx.lineTo(laneWidth, canvas.height);
+            ctx.moveTo(laneWidth * 2, 0);
+            ctx.lineTo(laneWidth * 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Road Outer Boundaries
+            ctx.strokeStyle = '#ec4899';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(5, 0);
+            ctx.lineTo(5, canvas.height);
+            ctx.moveTo(canvas.width - 5, 0);
+            ctx.lineTo(canvas.width - 5, canvas.height);
+            ctx.stroke();
+
+            // Answer Gates
+            gates.forEach(gate => {
+                let gateY = gate.y;
+                gate.items.forEach(item => {
+                    let laneX = item.lane * laneWidth + laneWidth / 2;
+                    let boxWidth = laneWidth - 25;
+                    let boxHeight = 50;
+                    let boxX = laneX - boxWidth / 2;
+                    let boxY = gateY - boxHeight / 2;
+
+                    ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+                    ctx.strokeStyle = '#06b6d4';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 12px Orbitron, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(item.text, laneX, gateY);
+                });
+            });
+
+            // Player Car
+            let carLaneX = gameState.carLane * laneWidth + laneWidth / 2;
+            let carY = canvas.height * 0.75;
+            let carW = 45;
+            let carH = 75;
+
+            ctx.shadowColor = '#06b6d4';
+            ctx.shadowBlur = 15;
+
+            ctx.fillStyle = '#06b6d4';
+            ctx.beginPath();
+            ctx.roundRect(carLaneX - carW / 2, carY - carH / 2, carW, carH, 12);
+            ctx.fill();
+
+            ctx.fillStyle = '#05050a';
+            ctx.beginPath();
+            ctx.roundRect(carLaneX - carW / 3, carY - carH / 4, carW * 0.66, carH * 0.3, 6);
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+        }
+
+        function endGame() {
+            stopGameIntervals();
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('summaryScreen').classList.remove('hidden');
+
+            let totalAnswers = gameState.correctCount + gameState.wrongCount;
+            let accuracy = totalAnswers > 0 ? Math.round((gameState.correctCount / totalAnswers) * 100) : 0;
+
+            document.getElementById('sumAccuracy').innerText = accuracy + "%";
+            document.getElementById('sumCorrect').innerText = gameState.correctCount;
+            document.getElementById('sumWrong').innerText = gameState.wrongCount;
+            document.getElementById('sumLives').innerText = gameState.lives + " / 3";
+
+            let evalEl = document.getElementById('evaluationText');
+            let feedbackMsg = `Siswa <strong>${playerName}</strong> (${playerClass}) menyelesaikan kuis dengan tingkat akurasi <strong>${accuracy}%</strong>. `;
+            
+            if (gameState.lives <= 0) {
+                feedbackMsg += `Sesi berakhir karena nyawa habis. Disarankan untuk meninjau kembali rumus Usaha ($W = F \\times s$) dan Daya ($P = W / t$) sebelum mencoba kembali.`;
+            } else if (accuracy >= 80) {
+                feedbackMsg += `Luar biasa! Pemahaman konsep Usaha dan Daya kamu sangat matang dan akurat.`;
+            } else if (accuracy >= 50) {
+                feedbackMsg += `Cukup baik! Pertahankan latihan perhitungan gaya, perpindahan, dan waktu agar lebih teliti.`;
+            } else {
+                feedbackMsg += `Tetap semangat! Pelajari kembali konsep dan satuan Usaha (Joule) serta Daya (Watt).`;
+            }
+            evalEl.innerHTML = feedbackMsg;
+        }
+
+        function restartGame() {
+            playSound('click');
+            document.getElementById('summaryScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
